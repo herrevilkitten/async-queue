@@ -100,4 +100,33 @@ describe("AsyncQueue", () => {
     const item = await queue.next();
     expect(item).toBe("from promise");
   });
+
+  it("should return undefined when peeking an empty queue", () => {
+    const queue = new AsyncQueue();
+    expect(queue.peek()).toBeUndefined();
+  });
+
+  it("should clear multiple pending promises", async () => {
+    const queue = new AsyncQueue();
+    const p1 = queue.next();
+    const p2 = queue.next();
+    queue.clear();
+    await expect(p1).rejects.toThrow("Queue cleared");
+    await expect(p2).rejects.toThrow("Queue cleared");
+  });
+
+  it("should not timeout if an item is added", async () => {
+    const queue = new AsyncQueue();
+    const p = queue.next(10);
+    queue.add(1);
+    await expect(p).resolves.toBe(1);
+  });
+
+  it("should allow adding items after being cleared", async () => {
+    const queue = new AsyncQueue();
+    queue.add(1);
+    queue.clear();
+    queue.add(2);
+    expect(await queue.next()).toBe(2);
+  });
 });
