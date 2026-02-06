@@ -47,6 +47,8 @@ export class AsyncQueue<T> {
    * resolved with the first item in the list. Otherwise, the
    * promise will be added to the resolve list and will be resolved
    * when new data is added.
+   * @param timeout The number of milliseconds to wait before rejecting the
+   * promise with a timeout error.
    * @returns A promise that will be resolved with the next item in the queue.
    */
   next(timeout?: number) {
