@@ -99,6 +99,66 @@ async function manageJobs() {
 manageJobs();
 ```
 
+## Usage with Async Generators
+
+`AsyncQueue` can be combined with async generators. This allows you to create a stream of data that can be consumed by a `for await...of` loop.
+
+Here's an example of how you might implement a `receive` method using an async generator:
+
+```typescript
+import { AsyncQueue } from "@herrevilkitten/async-queue";
+
+class DataReceiver {
+  private resolver = new AsyncQueue<string>();
+  public connected = true;
+
+  constructor() {
+    // Simulate receiving data from a source and adding it to the queue
+    let count = 1;
+    const interval = setInterval(() => {
+      if (!this.connected) {
+        clearInterval(interval);
+        return;
+      }
+      this.resolver.add(`Data packet ${count++}`);
+    }, 500);
+  }
+
+  async *receive() {
+    while (this.connected) {
+      let result = await this.resolver.next();
+      yield result;
+    }
+    return;
+  }
+
+  disconnect() {
+    this.connected = false;
+    this.resolver.clear(); // Clear queue and reject pending promises
+  }
+}
+
+async function consumeStream() {
+  const receiver = new DataReceiver();
+
+  console.log("Starting to consume data stream...");
+  let receivedCount = 0;
+
+  for await (const data of receiver.receive()) {
+    console.log(`Received: ${data}`);
+    receivedCount++;
+    if (receivedCount >= 3) {
+      console.log("Disconnecting after 3 packets.");
+      receiver.disconnect();
+    }
+  }
+
+  console.log("Finished consuming data stream.");
+}
+
+consumeStream();
+```
+
 ## API
 
 ### `new AsyncQueue<T>()`
