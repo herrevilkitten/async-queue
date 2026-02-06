@@ -1,0 +1,43 @@
+{
+  "name": "@herrevilkitten/async-queue",
+  "version": "1.0.0",
+  "description": "A simple asynchronous queue for TypeScript projects.",
+  "main": "dist/cjs/async-queue.js",
+  "module": "dist/esm/async-queue.js",
+  "types": "dist/cjs/async-queue.d.ts",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "test": "vitest",
+    "clean": "rm -rf dist",
+    "build": "pnpm clean && pnpm build:cjs && pnpm build:esm",
+    "build:cjs": "tsc -p tsconfig.cjs.json",
+    "build:esm": "tsc -p tsconfig.esm.json",
+    "prepublishOnly": "pnpm build"
+  },
+  "keywords": [
+    "async",
+    "queue",
+    "typescript"
+  ],
+  "author": {
+    "name": "herrevilkitten",
+    "email": "eric@kidderberg.us"
+  },
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/herrevilkitten/async-queue.git"
+  },
+  "bugs": {
+    "url": "https://github.com/herrevilkitten/async-queue/issues"
+  },
+  "homepage": "https://github.com/herrevilkitten/async-queue#readme",
+  "packageManager": "pnpm@10.26.2",
+  "devDependencies": {
+    "tsx": "^4.21.0",
+    "typescript": "^5.9.3",
+    "vitest": "^4.0.18"
+  }
+}
