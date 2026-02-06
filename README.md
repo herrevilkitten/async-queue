@@ -105,15 +105,21 @@ manageJobs();
 
 Creates a new instance of the `AsyncQueue`. The generic type `T` defines the type of items the queue will hold.
 
-### `.add(data: T | PromiseLike<T>)`
+### `.add(data: T)`
 
 Adds an item to the queue. If a consumer is already waiting on `.next()`, the promise will resolve with this item immediately. Otherwise, the item is stored in the queue.
 
-- `data`: The item to add to the queue. It can be a value or a promise.
+- `data`: The item to add to the queue.
 
-### `.next(): Promise<T>`
+### `.next(timeout?: number): Promise<T>`
 
 Returns a promise that resolves with the next item in the queue. If the queue is empty, it waits until a new item is added.
+
+- `timeout` (optional): The number of milliseconds to wait before rejecting the promise with a timeout error.
+
+### `.peek(): T | undefined`
+
+Returns the next item in the queue without removing it. Returns `undefined` if the queue is empty.
 
 ### `.size: number`
 
