@@ -99,65 +99,40 @@ async function manageJobs() {
 manageJobs();
 ```
 
-## Usage with Async Generators
+## Usage with the built-in Async Iterator
 
-`AsyncQueue` can be combined with async generators. This allows you to create a stream of data that can be consumed by a `for await...of` loop.
+`AsyncQueue` has a built-in async iterator, which allows you to use it directly in a `for await...of` loop. This is the simplest way to consume items from the queue.
 
-Here's an example of how you might implement a `receive` method using an async generator:
+The loop will automatically wait for new items to arrive and will terminate when the queue is cleared via the `.clear()` method.
 
 ```typescript
 import { AsyncQueue } from "@herrevilkitten/async-queue";
 
-class DataReceiver {
-  private resolver = new AsyncQueue<string>();
-  public connected = true;
+async function consumeWithIterator() {
+  const queue = new AsyncQueue<string>();
 
-  constructor() {
-    // Simulate receiving data from a source and adding it to the queue
-    let count = 1;
-    const interval = setInterval(() => {
-      if (!this.connected) {
-        clearInterval(interval);
-        return;
-      }
-      this.resolver.add(`Data packet ${count++}`);
-    }, 500);
+  // Add items to the queue in the background
+  setTimeout(() => {
+    queue.add("Message 1");
+    queue.add("Message 2");
+    queue.add("Message 3");
+    queue.clear(); // This will cause the for await...of loop to finish
+  }, 500);
+
+  console.log("Consumer is waiting for messages...");
+
+  // Consume items from the queue as they arrive
+  for await (const message of queue) {
+    console.log(`Consumed: ${message}`);
   }
 
-  async *receive() {
-    while (this.connected) {
-      let result = await this.resolver.next();
-      yield result;
-    }
-    return;
-  }
-
-  disconnect() {
-    this.connected = false;
-    this.resolver.clear(); // Clear queue and reject pending promises
-  }
+  console.log("Consumer has finished.");
 }
 
-async function consumeStream() {
-  const receiver = new DataReceiver();
-
-  console.log("Starting to consume data stream...");
-  let receivedCount = 0;
-
-  for await (const data of receiver.receive()) {
-    console.log(`Received: ${data}`);
-    receivedCount++;
-    if (receivedCount >= 3) {
-      console.log("Disconnecting after 3 packets.");
-      receiver.disconnect();
-    }
-  }
-
-  console.log("Finished consuming data stream.");
-}
-
-consumeStream();
+consumeWithIterator();
 ```
+
+This approach is recommended for most use cases as it is more concise than creating a custom async generator.
 
 ## API
 
@@ -195,6 +170,10 @@ A getter that returns `true` if the queue is empty, and `false` otherwise.
 ### `.clear()`
 
 Clears all items from the queue and rejects any pending promises from `.next()` calls.
+
+### `[Symbol.asyncIterator](): AsyncIterator<T>`
+
+Returns the built-in async iterator for the queue, allowing it to be used directly in `for await...of` loops. The loop will terminate when `.clear()` is called.
 
 ## License
 

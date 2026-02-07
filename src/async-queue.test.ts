@@ -129,4 +129,68 @@ describe("AsyncQueue", () => {
     queue.add(2);
     expect(await queue.next()).toBe(2);
   });
+
+  it("should work with async iterators", async () => {
+    const queue = new AsyncQueue<number>();
+    const results: number[] = [];
+
+    const consumer = async () => {
+      for await (const item of queue) {
+        results.push(item);
+      }
+    };
+
+    const producer = async () => {
+      queue.add(1);
+      queue.add(2);
+      queue.add(3);
+      // Give the consumer a moment to process the items
+      await new Promise((r) => setTimeout(r, 0));
+      queue.clear(); // This will end the for await...of loop
+    };
+
+    await Promise.all([consumer(), producer()]);
+
+    expect(results).toEqual([1, 2, 3]);
+  });
+
+  it("should handle async iterator with no items", async () => {
+    const queue = new AsyncQueue<number>();
+    const results: number[] = [];
+
+    const consumer = async () => {
+      for await (const item of queue) {
+        results.push(item);
+      }
+    };
+
+    const producer = async () => {
+      await new Promise((r) => setTimeout(r, 0));
+      queue.clear();
+    };
+
+    await Promise.all([consumer(), producer()]);
+
+    expect(results).toEqual([]);
+  });
+
+  it("should handle async iterator with initial items", async () => {
+    const queue = new AsyncQueue<number>([1, 2, 3]);
+    const results: number[] = [];
+
+    const consumer = async () => {
+      for await (const item of queue) {
+        results.push(item);
+      }
+    };
+
+    const producer = async () => {
+      await new Promise((r) => setTimeout(r, 0));
+      queue.clear();
+    };
+
+    await Promise.all([consumer(), producer()]);
+
+    expect(results).toEqual([1, 2, 3]);
+  });
 });

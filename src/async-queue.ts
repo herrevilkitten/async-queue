@@ -104,4 +104,20 @@ export class AsyncQueue<T> {
     this.resolveList.length = 0;
     this.rejectList.length = 0;
   }
+
+  /**
+   * Returns an async iterator for the queue.
+   */
+  [Symbol.asyncIterator]() {
+    return (async function* (queue: AsyncQueue<T>) {
+      while (true) {
+        try {
+          const item = await queue.next();
+          yield item;
+        } catch {
+          return;
+        }
+      }
+    })(this);
+  }
 }
