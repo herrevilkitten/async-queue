@@ -161,9 +161,12 @@ consumeStream();
 
 ## API
 
-### `new AsyncQueue<T>()`
+### `new AsyncQueue<T>(initial?: T[])`
 
-Creates a new instance of the `AsyncQueue`. The generic type `T` defines the type of items the queue will hold.
+Creates a new instance of the `AsyncQueue`.
+
+- `T` (optional): The generic type `T` defines the type of items the queue will hold.
+- `initial` (optional): An initial list of items to add to the queue.
 
 ### `.add(data: T)`
 
@@ -184,6 +187,14 @@ Returns the next item in the queue without removing it. Returns `undefined` if t
 ### `.size: number`
 
 A getter that returns the number of items currently in the queue. This does not include consumers waiting for items.
+
+### `.isEmpty: boolean`
+
+A getter that returns `true` if the queue is empty, and `false` otherwise.
+
+### `.clear()`
+
+Clears all items from the queue and rejects any pending promises from `.next()` calls.
 
 ## License
 
